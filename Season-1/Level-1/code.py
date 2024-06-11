@@ -17,7 +17,11 @@ Order = namedtuple('Order', 'id, items')
 Item = namedtuple('Item', 'type, description, amount, quantity')
 
 def validorder(order: Order):
+    if not isinstance(order.items, list) or not all(isinstance(item, Item) for item in order.items):
+        return "Invalid order items"
+
     net = 0
+    invalid_items = []
 
     for item in order.items:
         if item.type == 'payment':
@@ -25,7 +29,10 @@ def validorder(order: Order):
         elif item.type == 'product':
             net -= item.amount * item.quantity
         else:
-            return "Invalid item type: %s" % item.type
+            invalid_items.append(item.type)
+
+    if invalid_items:
+        return "Invalid item types: %s" % ', '.join(invalid_items)
 
     if net != 0:
         return "Order ID: %s - Payment imbalance: $%0.2f" % (order.id, net)
